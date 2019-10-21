@@ -83,7 +83,7 @@ class Game:
             'leaders': raw_stats["leaders"],
             'players': []
         }
-        for i in range(4):
+        for i in range(len(raw_team_score_info["linescore"])):
             score_info["quarter_scores"].append(
                 raw_team_score_info["linescore"][i]["score"]
             )
