@@ -1,6 +1,7 @@
+import json
+
 import requests
 from requests.exceptions import HTTPError
-import json
 
 DATA_NBA_ENDPOINT = "http://data.nba.net/data/10s/prod/v1"
 
@@ -39,10 +40,16 @@ class Scoreboard:
             raise Exception("Raw scoreboard was not retrieved")
         scoreboard_dict = json.loads(raw_scoreboard)
         # self.scoreboard_dict = scoreboard_dict  # Probably remove to save memory
-        game_ids = []
+        self.game_ids = []
         for game in scoreboard_dict["games"]:
             if game["gameId"][0:1] == '0':  # Only NBA Games start with 0
-                game_ids.append(game["gameId"])
+                self.game_ids.append(game["gameId"])
+    
+    def get_game_ids(self):
+        return self.game_ids
+
+    def dictionary(self):
+        return self.__dict__
 
 
 class Game:
@@ -70,6 +77,7 @@ class Game:
                 self.h_team["players"].append(player)
         print(self)
     
+
     @staticmethod
     def team_score(raw_team_score_info, raw_stats):
         score_info = {

@@ -1,8 +1,12 @@
-import os
-from flask import Flask, jsonify, Response
-from dotenv import load_dotenv
 import json
-from nba_stats import Scoreboard, Game
+import os
+
+from dotenv import load_dotenv
+from flask import Flask, Response, jsonify
+
+from models.game import Game
+from models.scoreboard import Scoreboard
+from models.stats_endpoint import StatsEndpoint
 
 load_dotenv()
 
@@ -17,19 +21,39 @@ def boxscores_today():
 
 @app.route('/date/<date>')
 def boxscores(date):
-    return "Hello {}!".format(date)
+    try:
+        s = Scoreboard(date)
+        return Response(json.dumps(s.get_boxscores()), mimetype='application/json')
+    except:
+        no_info = {
+            'game_ids': [],
+            'amount_of_games': 0,
+            'boxscores': []
+        }
+        return Response(json.dumps(no_info), mimetype='application/json')
 
 
 @app.route('/scoreboard/<date>')
 def scoreboard(date):
-    Scoreboard(date)
-    return "Hello {}!".format(date)
+    s = Scoreboard(date)
+    return Response(json.dumps(s.dictionary()), mimetype='application/json')
 
 
 @app.route('/date/<date>/<gameid>')
 def boxscore(date, gameid):
     g = Game(date, gameid)
     return Response(json.dumps(g.dictionary()), mimetype='application/json')
+
+@app.route('/games/<date>')
+def games(date):
+    s = Scoreboard(date)
+    return Response(json.dumps(s.dictionary()), mimetype='application/json')
+
+@app.after_request
+def after_request(response):
+    header = response.headers
+    header['Access-Control-Allow-Origin'] = r'http://localhost:3000'
+    return response
 
 if __name__ == '__main__':
     app.run()
