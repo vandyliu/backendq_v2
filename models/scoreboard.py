@@ -29,6 +29,9 @@ class Scoreboard:
             'boxscores': []
         }
         for game_id in self.game_ids:
-            boxscore = Game(self.date, game_id).dictionary()
-            info['boxscores'].append(boxscore)
+            try:
+                boxscore = Game(self.date, game_id).dictionary()
+                info['boxscores'].append(boxscore)
+            except:
+                pass
         return info
