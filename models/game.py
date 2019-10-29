@@ -1,6 +1,7 @@
 import json
 
 from models.stats_endpoint import StatsEndpoint
+from models.exceptions.stats_endpoint_retrieval_exception import StatsEndpointRetrievalException
 
 class Game:
     def __init__(self, date, game_id):
@@ -8,12 +9,14 @@ class Game:
         self.game_id = game_id
         raw_boxscore = StatsEndpoint.get_raw_boxscore(date, game_id)
         if not raw_boxscore:
-            raise Exception("Raw boxscore was not retrieved")
+            raise StatsEndpointRetrievalException("Raw boxscore was not retrieved")
         boxscore_dict = json.loads(raw_boxscore)
         # self.boxscore_dict = boxscore_dict  # Remove to save memory
         self.is_game_activated = boxscore_dict["basicGameData"]["isGameActivated"]
         self.status_num = boxscore_dict["basicGameData"]["statusNum"]
         self.period = boxscore_dict["basicGameData"]["period"]
+        self.clock = boxscore_dict["basicGameData"]["clock"]
+        self.start_time_eastern = boxscore_dict["basicGameData"]["startTimeEastern"]
         self.v_team = Game.team_score(
             boxscore_dict["basicGameData"]["vTeam"], boxscore_dict["stats"]["vTeam"]
         )

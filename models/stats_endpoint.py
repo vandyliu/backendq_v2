@@ -15,6 +15,9 @@ class StatsEndpoint:
             url = f"{DATA_NBA_ENDPOINT}/{date}/{game_id}_boxscore.json"
         elif type == 'mini_boxscore':
             url = f"{DATA_NBA_ENDPOINT}/{date}/{game_id}_mini_boxscore.json"
+        elif type == 'teams':
+            # date is actually just a year
+            url = f"{DATA_NBA_ENDPOINT}/{date}/teams.json"
         try:
             print(f'Accessing: {url}')
             resp = requests.get(url)
@@ -32,3 +35,7 @@ class StatsEndpoint:
     @staticmethod
     def get_raw_boxscore(date, game_id):
         return StatsEndpoint.get_from_data_nba('boxscore', date, game_id)
+
+    @staticmethod
+    def get_raw_teams(date):
+        return StatsEndpoint.get_from_data_nba('teams', date)

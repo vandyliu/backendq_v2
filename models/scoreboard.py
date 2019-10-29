@@ -2,13 +2,14 @@ import json
 
 from models.stats_endpoint import StatsEndpoint
 from models.game import Game
+from models.exceptions.stats_endpoint_retrieval_exception import StatsEndpointRetrievalException
 
 class Scoreboard:
     def __init__(self, date):
         self.date = date
         raw_scoreboard = StatsEndpoint.get_raw_scoreboard(date)
         if not raw_scoreboard:
-            raise Exception("Raw scoreboard was not retrieved")
+            raise StatsEndpointRetrievalException("Raw scoreboard was not retrieved")
         scoreboard_dict = json.loads(raw_scoreboard)
         # self.scoreboard_dict = scoreboard_dict  # Probably remove to save memory
         self.game_ids = []
@@ -32,6 +33,8 @@ class Scoreboard:
             try:
                 boxscore = Game(self.date, game_id).dictionary()
                 info['boxscores'].append(boxscore)
-            except:
-                pass
+            except StatsEndpointRetrievalException as e:
+                print(f"Stats endpoint retrieval exception: {e}")
+            except Exception as err:
+                print(f"Generic exception: {err}")
         return info
