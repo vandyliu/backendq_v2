@@ -21,8 +21,8 @@ class Game:
         self.v_team = Game.team_score(boxscore_dict["basicGameData"]["vTeam"])
         self.h_team = Game.team_score(boxscore_dict["basicGameData"]["hTeam"])
         if "stats" in boxscore_dict:
-            add_player_stats(boxscore_dict["stats"]["vTeam"], "visiting")
-            add_player_stats(boxscore_dict["stats"]["hTeam"], "home")
+            self.add_player_stats(boxscore_dict["stats"]["vTeam"], "visiting")
+            self.add_player_stats(boxscore_dict["stats"]["hTeam"], "home")
         if "playoffs" in boxscore_dict["basicGameData"]:
             self.game_text = boxscore_dict["basicGameData"]["playoffs"]["seriesSummaryText"]
         if self.status_num != 1:
@@ -51,13 +51,13 @@ class Game:
             )
         return score_info
     
-    def get_player_stats(self, raw_stats):
-        if raw_stats == "visiting":
-            self.v_team.score_info['totals'] = raw_stats["totals"]
-            self.v_team.score_info['leaders'] = raw_stats["leaders"]
-        elif raw_stats == "home":
-            self.h_team.score_info['totals'] = raw_stats["totals"]
-            self.h_team.score_info['leaders'] = raw_stats["leaders"]
+    def add_player_stats(self, raw_stats, team):
+        if team == "visiting":
+            self.v_team['totals'] = raw_stats["totals"]
+            self.v_team['leaders'] = raw_stats["leaders"]
+        elif team == "home":
+            self.h_team['totals'] = raw_stats["totals"]
+            self.h_team['leaders'] = raw_stats["leaders"]
 
     @staticmethod
     def get_full_team_name(tri_code):
