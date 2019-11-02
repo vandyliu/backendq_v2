@@ -11,30 +11,30 @@ class Game:
         if not raw_boxscore:
             raise StatsEndpointRetrievalException("Raw boxscore was not retrieved")
         boxscore_dict = json.loads(raw_boxscore)
-        # self.boxscore_dict = boxscore_dict  # Remove to save memory
+        # self.boxscore_dict = boxscore_dict  # Remove to save memory        
         self.is_game_activated = boxscore_dict["basicGameData"]["isGameActivated"]
         self.status_num = boxscore_dict["basicGameData"]["statusNum"]
+        self.extended_status_num = boxscore_dict["basicGameData"]["extendedStatusNum"]
         self.period = boxscore_dict["basicGameData"]["period"]
         self.clock = boxscore_dict["basicGameData"]["clock"]
         self.start_time_eastern = boxscore_dict["basicGameData"]["startTimeEastern"]
-        self.v_team = Game.team_score(
-            boxscore_dict["basicGameData"]["vTeam"], boxscore_dict["stats"]["vTeam"]
-        )
-        self.h_team = Game.team_score(
-            boxscore_dict["basicGameData"]["hTeam"], boxscore_dict["stats"]["hTeam"]
-        )
-        for player in boxscore_dict["stats"]["activePlayers"]:
-            if player["teamId"] == self.v_team["t_id"]:
-                self.v_team["players"].append(player)
-            else:
-                self.h_team["players"].append(player)
-        
+        self.v_team = Game.team_score(boxscore_dict["basicGameData"]["vTeam"])
+        self.h_team = Game.team_score(boxscore_dict["basicGameData"]["hTeam"])
+        if "stats" in boxscore_dict:
+            add_player_stats(boxscore_dict["stats"]["vTeam"], "visiting")
+            add_player_stats(boxscore_dict["stats"]["hTeam"], "home")
         if "playoffs" in boxscore_dict["basicGameData"]:
             self.game_text = boxscore_dict["basicGameData"]["playoffs"]["seriesSummaryText"]
+        if self.status_num != 1:
+            for player in boxscore_dict["stats"]["activePlayers"]:
+                if player["teamId"] == self.v_team["t_id"]:
+                    self.v_team["players"].append(player)
+                else:
+                    self.h_team["players"].append(player)
     
 
     @staticmethod
-    def team_score(raw_team_score_info, raw_stats):
+    def team_score(raw_team_score_info):
         score_info = {
             't_id': raw_team_score_info["teamId"],
             'name': Game.get_full_team_name(raw_team_score_info["triCode"]),
@@ -43,17 +43,22 @@ class Game:
             'loss': raw_team_score_info["loss"],
             'score': raw_team_score_info["score"],
             'quarter_scores': [],
-            'totals': raw_stats["totals"],
-            'leaders': raw_stats["leaders"],
             'players': []
         }
         for i in range(len(raw_team_score_info["linescore"])):
             score_info["quarter_scores"].append(
                 raw_team_score_info["linescore"][i]["score"]
             )
-        
         return score_info
     
+    def get_player_stats(self, raw_stats):
+        if raw_stats == "visiting":
+            self.v_team.score_info['totals'] = raw_stats["totals"]
+            self.v_team.score_info['leaders'] = raw_stats["leaders"]
+        elif raw_stats == "home":
+            self.h_team.score_info['totals'] = raw_stats["totals"]
+            self.h_team.score_info['leaders'] = raw_stats["leaders"]
+
     @staticmethod
     def get_full_team_name(tri_code):
         team = ""

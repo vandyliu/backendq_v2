@@ -5,13 +5,17 @@ from models.game import Game
 from models.exceptions.stats_endpoint_retrieval_exception import StatsEndpointRetrievalException
 
 class Scoreboard:
-    def __init__(self, date):
+    def __init__(self, date, file_path=None):
         self.date = date
-        raw_scoreboard = StatsEndpoint.get_raw_scoreboard(date)
-        if not raw_scoreboard:
-            raise StatsEndpointRetrievalException("Raw scoreboard was not retrieved")
-        scoreboard_dict = json.loads(raw_scoreboard)
-        # self.scoreboard_dict = scoreboard_dict  # Probably remove to save memory
+        scoreboard_dict = {}
+        if file_path:
+            with open(file_path) as json_file:
+                scoreboard_dict = json.load(json_file)
+        else:
+            raw_scoreboard = StatsEndpoint.get_raw_scoreboard(date)
+            if not raw_scoreboard:
+                raise StatsEndpointRetrievalException("Raw scoreboard was not retrieved")
+            scoreboard_dict = json.loads(raw_scoreboard)
         self.game_ids = []
         for game in scoreboard_dict["games"]:
             if game["gameId"][0:1] == '0':  # Only NBA Games start with 0
