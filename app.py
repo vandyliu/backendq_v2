@@ -52,7 +52,7 @@ def hardcode_boxscores():
 @app.after_request
 def after_request(response):
     header = response.headers
-    header['Access-Control-Allow-Origin'] = r'https://vandyliu.com'
+    header['Access-Control-Allow-Origin'] = "*"
     return response
 
 if __name__ == '__main__':
